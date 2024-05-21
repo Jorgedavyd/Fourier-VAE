@@ -19,6 +19,6 @@ We can add complex activation functions in the fourier space, such as ReLU, SiLU
 Also: batch, layer, grouped, instance normalization could be used in this case, It's a matter of trying them out.
 ## Autoencoder usage:
 An autoencoder is usually a skip connection-like architecture between encoder and decoder. Here, the encoder-decoder skip connections would be the output of encoder fourier convolutions for the Nth step, then we add this up to the input (N-1)th step of the decoder in the fourier space. We now find a learnable weight $W$ in the fourier space such that:
-$O_{D_t} = \frac{O_{E_t} + I O_{D_{t-1}}{W}$
+$O_{D_t} = \frac{O_{E_t} + I O_{D_{t-1}}}{W}$
 where I is the identity convolutional operator.
 
