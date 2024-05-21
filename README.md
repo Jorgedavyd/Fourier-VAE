@@ -6,4 +6,4 @@ $\mathcal{F}(f * g) = \mathcal{F}(f) \odot \mathcal{F}(g)$
 
 # Deconvolutions in $\mathcal{F}$
 
-$\mathcal{F}(f) = \frac{\mathcal{F}(f) \odot \mathcal{F}(g)}{\mathcal{F}(g) + \eps}$
+$\mathcal{F}(f) = \frac{\mathcal{F}(f) \odot \mathcal{F}(g)}{\mathcal{F}(g) + \epsilon}$
