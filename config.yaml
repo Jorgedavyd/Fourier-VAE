@@ -1,0 +1,29 @@
+trainer:
+  logger: true
+  enable_checkpointing: true
+  max_epochs: 250
+  accelerator: cuda
+  devices:  1
+  precision: 32
+  
+model:
+  class_path: utils.FourierVAE
+  dict_kwargs:
+    encoder_lr: 2e-2
+    encoder_wd: 0
+    decoder_lr: 1e-2
+    decoder_wd: 0
+    alpha:
+      - 0.02
+      - 0.003
+      - 0.003
+      - 0.01
+    beta: 0.00001
+    activation: None
+    optimizer: adam
+    
+data:
+  type_dataset: mnist
+  batch_size: 12
+  pin_memory: true
+  num_workers: 8
