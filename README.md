@@ -1,6 +1,6 @@
 
-# Fourier Autoencoders
-Using Fourier space properties to enhance inference speed and take advantage of paralellization.
+# Fourier Variational Autoencoders
+Using Fourier space properties to enhance inference speed and take advantage of paralellization for variational autoencoders.
 
 ## Convolutions in $\mathcal{F}$
 $\mathcal{F}(f * g) = \mathcal{F}(f) \odot \mathcal{F}(g)$

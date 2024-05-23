@@ -1,18 +1,6 @@
-from lightning.pytorch.cli import LightningCLI
-from module.data import CoronagraphDataModule
-import torch
+from framework.trainer.cli import trainer
+from data import NormalModule
 
 if __name__ == "__main__":
-    
-    torch.set_float32_matmul_precision('high')    
-
-    cli = LightningCLI(
-        datamodule_class=CoronagraphDataModule,
-        seed_everything_default=123,
-        trainer_defaults={
-            'deterministic': True, 
-
-        },
-    )
-
+    trainer(NormalModule, matmul_precision = 'high', deterministic = True, seed = 123)
 

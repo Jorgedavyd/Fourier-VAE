@@ -1,5 +1,5 @@
 from framework.nn.complex import Complex
-from framework.nn.fourier import FourierConv2d, FourierDeconv2d
+from framework.nn.fourier import FourierConv2d
 from framework.nn.functional import residual_connection
 from framework.training.supervised import Module
 from framework.nn.transformers.attention import SelfAttention, GroupedQueryAttention
@@ -8,7 +8,8 @@ from torch import Tensor, nn
 import torch
 import torch.nn.functional as F
 import math
-from typing import Sequence, List, Tuple, Dict, Any
+from typing import Sequence, List
+from loss import Loss
 
 VALID_ACTIVATIONS = {
     'relu': Complex(nn.ReLU),
@@ -214,7 +215,7 @@ class FourierVAE(Module):
         super().__init__(**hparams)
         self.encoder = Encoder(256, 256, *args)
         self.decoder = Decoder(256, 256, *args)
-        
+        self.criterion = Loss(self.alpha, self.beta)
     def forward(self, x: Tensor) -> Tensor:
         x, mu, logvar, hist = self.encoder(x)
         x = self.decoder(x, hist)

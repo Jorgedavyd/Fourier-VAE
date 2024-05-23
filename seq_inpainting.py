@@ -8,7 +8,7 @@ from framework.nn.utils import residual_connection
 from framework.nn.transformers.attention import CrossAttention, GroupedQueryAttention
 from framework.nn.complex import Complex
 from utils import Decoder as Decoder_
-from typing import List, Sequence
+from typing import Sequence
 from einops import rearrange
 import torch
 import random
