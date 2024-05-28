@@ -3,10 +3,10 @@
 # upsampling in the decoder of the VAE
 from torch import Tensor, nn
 from utils import Encoder, UpsamplingFourierDeconvolution, FourierVAE
-from framework.training.supervised import Module
-from framework.nn.utils import residual_connection
-from framework.nn.transformers.attention import CrossAttention, GroupedQueryAttention
-from framework.nn.complex import Complex
+from lightorch.training.supervised import Module
+from lightorch.nn.functional import residual_connection
+from lightorch.nn.transformer.attention import CrossAttention, GroupedQueryAttention
+from lightorch.nn.complex import Complex
 from utils import Decoder as Decoder_
 from typing import Sequence
 from einops import rearrange
@@ -19,7 +19,7 @@ class CrossAttentionBlock(nn.Module):
         self.cross_attention_block = Complex(CrossAttention(GroupedQueryAttention, )) # revise
         self.default = nn.Sequential(
             Complex(nn.GroupNorm(32, channels)),
-            Complex(nn.SiLU)
+            Complex(nn.SiLU())
         )
     def forward(self, input: Tensor, last_image: Tensor) -> Tensor:
         return residual_connection(input, lambda x: self.cross_attention_block(rearrange(x, 'b c h w -> b c (h w)'), rearrange(last_image, 'b c h w -> b c (h w)')))

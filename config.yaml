@@ -19,7 +19,6 @@ model:
       - 0.003
       - 0.01
     beta: 0.00001
-    activation: None
     optimizer: adam
     
 data:

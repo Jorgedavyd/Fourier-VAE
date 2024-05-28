@@ -1,4 +1,4 @@
-from framework.trainer.cli import trainer
+from lightorch.training.cli import trainer
 from data import NormalModule
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
-from framework.nn.complex import Complex
-from framework.nn.fourier import FourierConv2d
-from framework.nn.functional import residual_connection
-from framework.training.supervised import Module
-from framework.nn.transformers.attention import SelfAttention, GroupedQueryAttention
+from lightorch.nn.complex import Complex
+from lightorch.nn.fourier import FourierConv2d
+from lightorch.nn.functional import residual_connection
+from lightorch.training.supervised import Module
+from lightorch.nn.transformer.attention import SelfAttention, GroupedQueryAttention
 from einops import rearrange
 from torch import Tensor, nn
 import torch
@@ -27,28 +27,19 @@ class AttentionBlock(nn.Sequential):
         super().__init__(
             Complex(nn.GroupNorm(32, channels)),
             Complex(nn.SiLU),
-            Complex(SelfAttention(GroupedQueryAttention))
+            Complex(SelfAttention(GroupedQueryAttention, ))
         )
         self.default_step = nn.Sequential(
             Complex(nn.GroupNorm(32, channels)),
             Complex(nn.SiLU)
         )
-        self.attention = Complex(SelfAttention(GroupedQueryAttention()))
+        self.attention = Complex(SelfAttention())
 
     def forward(self, x: Tensor) -> Tensor:
         return residual_connection(
             x,
             lambda x: self.attention(rearrange(self.default_step(x), 'b c h w -> b c (h w)')).reshape(x.shape)
             )
-    
-class IdentityConvolution(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, pool: int = 2) -> None:
-        super().__init__()
-        self.pool = pool
-        self.weight = torch.ones(out_channels, in_channels, 1, 1, requires_grad=False)
-    @torch.no_grad()
-    def forward(self, input: Tensor) -> Tensor:
-        return F.conv2d(input.real, self.weight, stride = self.pool) + 1j*F.conv2d(input.imag, self.weight, stride = self.pool)
 
 class DownsamplingFourierConvolution(nn.Sequential):
     def __init__(
@@ -59,9 +50,9 @@ class DownsamplingFourierConvolution(nn.Sequential):
             pool: int
     ) -> None:
         super().__init__(
-            Complex(nn.GroupNorm, 32, channels),
-            Complex(nn.SiLU),
-            Complex(nn.MaxPool2d, pool, pool),
+            Complex(nn.GroupNorm(32, channels)),
+            Complex(nn.SiLU()),
+            Complex(nn.MaxPool2d(pool, pool)),
             FourierConv2d(channels, channels, height, width),
         )
     
@@ -77,16 +68,16 @@ class ResidualBlock(nn.Sequential):
             self.residue = FourierConv2d(in_channels, out_channels, height, width, bias = True)
 
         self.sublayer = nn.Sequential(
-            Complex(nn.GroupNorm, 32, in_channels),
-            Complex(nn.SiLU),
+            Complex(nn.GroupNorm(32, in_channels)),
+            Complex(nn.SiLU()),
             FourierConv2d(in_channels, out_channels, height, width, bias = True),
-            Complex(nn.GroupNorm, 32, out_channels),
-            Complex(nn.SiLU),
+            Complex(nn.GroupNorm(32, out_channels)),
+            Complex(nn.SiLU()),
             FourierConv2d(out_channels, out_channels, height, width, bias = True)
             )
     
     def forward(self, input: Tensor) -> Tensor:
-        return self.residue(input) + self.sublayer(input)
+        return residual_connection(input, lambda x: self.sublayer(x), lambda x: self.residue(x))
 
 class UpsamplingFourierDeconvolution(nn.Sequential):
     def __init__(
@@ -99,15 +90,15 @@ class UpsamplingFourierDeconvolution(nn.Sequential):
     ) -> None:
         super().__init__()
         self.encoder_norm = nn.Sequential(
-            Complex(nn.GroupNorm, 32, channels),
-            Complex(nn.SiLU),
+            Complex(nn.GroupNorm(32, channels)),
+            Complex(nn.SiLU()),
         )
         self.decoder_norm = nn.Sequential(
-            Complex(nn.GroupNorm, 32, channels),
-            Complex(nn.SiLU),
+            Complex(nn.GroupNorm(32, channels)),
+            Complex(nn.SiLU()),
         )
 
-        self.pool = Complex(nn.UpsamplingBilinear2d, scale_factor = pool)
+        self.pool = Complex(nn.UpsamplingBilinear2d(scale_factor=2))
 
         self.weight = torch.fft.fftn(
             nn.init.kaiming_normal_(
